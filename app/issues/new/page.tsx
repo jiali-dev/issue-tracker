@@ -1,7 +1,6 @@
 "use client";
 
-import { Text, Button, Callout, TextField } from "@radix-ui/themes";
-import SimpleMDE from "react-simplemde-editor";
+import { Button, Callout, TextField } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import "easymde/dist/easymde.min.css";
@@ -10,8 +9,12 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createIssueSchema } from "@/app/validationSchemas";
 import { z } from "zod";
-import ErrorMessage from "@/app/components/ErrorMessage";
-import Spinner from "@/app/components/Spinner";
+import { ErrorMessage, Spinner } from "@/app/components";
+import dynamic from "next/dynamic";
+
+const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
+  ssr: false,
+});
 
 type IssueForm = z.infer<typeof createIssueSchema>;
 const NewIssuePage = () => {
@@ -33,7 +36,7 @@ const NewIssuePage = () => {
       setSubmitting(false);
       setError("An unexpexted error occurred.");
     }
-  })
+  });
   return (
     <div className="max-w-xl ">
       {error && (
@@ -41,15 +44,10 @@ const NewIssuePage = () => {
           <Callout.Text>{error}</Callout.Text>
         </Callout.Root>
       )}
-      <form
-        className="space-y-3"
-        onSubmit={onSubmit}
-      >
+      <form className="space-y-3" onSubmit={onSubmit}>
         <TextField.Root placeholder="Title" {...register("title")} />
-        <ErrorMessage>
-        {errors.title?.message}
-        </ErrorMessage>
-        
+        <ErrorMessage>{errors.title?.message}</ErrorMessage>
+
         <Controller
           name="description"
           control={control}
@@ -57,9 +55,7 @@ const NewIssuePage = () => {
             <SimpleMDE placeholder="Description" {...field} />
           )}
         />
-          <ErrorMessage>
-        {errors.description?.message}
-        </ErrorMessage>
+        <ErrorMessage>{errors.description?.message}</ErrorMessage>
         <Button>Submit New Issue{isSubmitting && <Spinner />}</Button>
       </form>
     </div>
